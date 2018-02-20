@@ -1,0 +1,14 @@
+[Unit]
+Description=FAST ROS Server - making your environment variables rad
+Documentation=https://docs.realm.io
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/ec2-user/FAST-ROS-Production/start.sh
+WorkingDirectory=/home/ec2-user/FAST-ROS-Production
+Restart=on-failure
+User=ec2-user
+
+[Install]
+WantedBy=multi-user.target
