@@ -1,7 +1,5 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Metadata": {
-    },
     "Resources": {
         "Vpc": {
             "Type": "AWS::EC2::VPC",
@@ -9,8 +7,6 @@
                 "EnableDnsSupport": "true",
                 "EnableDnsHostnames": "true",
                 "CidrBlock": "10.0.0.0/22"
-            },
-            "Metadata": {
             }
         },
         "VpcGwAttach": {
@@ -22,21 +18,6 @@
                 "VpcId": {
                     "Ref": "Vpc"
                 }
-            },
-            "Metadata": {
-            }
-        },
-        "SubnetRouteTableAssoc": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PubRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "SubnetA"
-                }
-            },
-            "Metadata": {
             }
         },
         "RosSecurityGroup": {
@@ -64,8 +45,6 @@
                         }
                     }
                 ]
-            },
-            "Metadata": {
             }
         },
         "RosLaunchConfig": {
@@ -91,9 +70,8 @@
                         }
                     ]
                 },
-                "KeyName": {
-                    "Ref": "KeyName"
-                },
+                "KeyName": { "Ref": "KeyName" },
+                "SecurityGroups": [ { "Ref": "RosSecurityGroup" } ],
                 "AssociatePublicIpAddress": "true",
                 "UserData": {
                     "Fn::Base64": {
@@ -130,20 +108,9 @@
                             ]
                         ]
                     }
-                },
-                "SecurityGroups": [
-                    {
-                        "Ref": "RosSecurityGroup"
-                    }
-                ],
-                "ClassicLinkVPCId": {
-                    "Ref": "Vpc"
                 }
             },
             "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "a7d9302f-c9c6-4d58-8e97-ed382bafa7b2"
-                },
                 "AWS::CloudFormation::Init": {
                     "configSets": {
                         "All": [
@@ -183,32 +150,15 @@
                 }
             }
         },
-        "RosCluster": {
+        "RosASG": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "MinSize": "1",
                 "MaxSize": "1",
-                "DesiredCapacity": {
-                    "Ref": "RosServerCount"
-                },
-                "VPCZoneIdentifier": [
-                    {
-                        "Ref": "SubnetA"
-                    },
-                    {
-                        "Ref": "SubnetB”
-                    }
-                ],
-                "LoadBalancerNames": [
-                    {
-                        "Ref": "RosALB"
-                    }
-                ],
-                "LaunchConfigurationName": {
-                    "Ref": "RosLaunchConfig"
-                }
-            },
-            "Metadata": {
+                "DesiredCapacity": { "Ref": "RosServerCount" },
+                "VPCZoneIdentifier": [ { "Ref": "SubnetA" }, { "Ref": "SubnetB" } ],
+                "TargetGroupARNs": [ { "Ref": "RosTargetGroup" } ],
+                "LaunchConfigurationName": { "Ref": "RosLaunchConfig" }
             },
             "DependsOn": [
                 "PubRoute"
@@ -225,8 +175,6 @@
                     "Ref": "InternetGateway"
                 }
             },
-            "Metadata": {
-            },
             "DependsOn": [
                 "InternetGateway"
             ]
@@ -237,70 +185,46 @@
                 "VpcId": {
                     "Ref": "Vpc"
                 }
-            },
-            "Metadata": {
             }
         },
         "InternetGateway": {
             "Type": "AWS::EC2::InternetGateway",
-            "Properties": {},
-            "Metadata": {
-            }
+            "Properties": {}
         },
         "HttpListener": {
             "Type": "AWS::ElasticLoadBalancingV2::Listener",
             "Properties": {
-                "LoadBalancerArn": {
-                    "Ref": "RosALB"
-                },
+                "LoadBalancerArn": { "Ref": "RosALB" },
                 "Port": 80,
                 "Protocol": "HTTP",
                 "DefaultActions": [
                     {
                         "Type": "forward",
-                        "TargetGroupArn": {
-                            "Ref": "RosTargetGroup"
-                        }
+                        "TargetGroupArn": { "Ref": "RosTargetGroup" }
                     }
                 ]
-            },
-            "Metadata": {
             }
         },
         "RosTargetGroup": {
             "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
             "Properties": {
-                "VpcId": {
-                    "Ref": "Vpc"
-                },
-                "HealthCheckIntervalSeconds": 60,
-                "UnhealthyThresholdCount": 5,
+                "VpcId": { "Ref": "Vpc" },
+                "HealthCheckIntervalSeconds": 15,
+                "HealthCheckTimeoutSeconds": 10,
                 "HealthCheckPath": "/",
-                "Name": "MyTargetGroup",
+                "HealthCheckProtocol": "HTTP",
                 "Port": 80,
-                "Protocol": "HTTP"
-            },
-            "Metadata": {
+                "Protocol": "HTTP",
+                "Matcher": {
+                    "HttpCode": "200-299"
+                }
             }
         },
         "RosALB": {
             "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
             "Properties": {
-                "SecurityGroups": [
-                    {
-                        "Ref": "RosALBSecurityGroup"
-                    }
-                ],
-                "Subnets": [
-                    {
-                        "Ref": "SubnetA"
-                    },
-                    {
-                        "Ref": "SubnetB”
-                    }
-                ]
-            },
-            "Metadata": {
+                "SecurityGroups": [ { "Ref": "RosALBSecurityGroup" } ],
+                "Subnets": [ { "Ref": "SubnetA" }, { "Ref": "SubnetB" } ]
             }
         },
         "RosALBSecurityGroup": {
@@ -326,8 +250,6 @@
                 "VpcId": {
                     "Ref": "Vpc"
                 }
-            },
-            "Metadata": {
             }
         },
         "SubnetA": {
@@ -336,20 +258,36 @@
                 "VpcId": {
                     "Ref": "Vpc"
                 },
-                "CidrBlock": "10.0.0.0/24"
+                "CidrBlock": "10.0.0.0/24",
+                "AvailabilityZone": {
+                    "Ref": "AzA"
+                }
             }
         },
-        “SubnetB”: {
+        "SubnetB": {
             "Type": "AWS::EC2::Subnet",
             "Properties": {
                 "VpcId": {
                     "Ref": "Vpc"
                 },
-                "CidrBlock": "10.0.1.0/24"
+                "CidrBlock": "10.0.1.0/24",
+                "AvailabilityZone": {
+                    "Ref": "AzB"
+                }
             }
         }
     },
     "Parameters": {
+        "AzA": {
+            "Description": "Name of the first availability zone in which the servers will be created.",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Default": "us-west-2a"
+        },
+         "AzB": {
+            "Description": "Name of the second availability zone in which the servers will be created.",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Default": "us-west-2b"
+        },
         "RosServerCount": {
             "Description": "Number of Amazon EC2 instances to launch for the WebServer server",
             "Type": "Number",
