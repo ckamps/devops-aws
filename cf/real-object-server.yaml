@@ -177,7 +177,7 @@ Resources:
             - '/opt/aws/bin/cfn-init -v '
             - '         --stack '
             - !Ref 'AWS::StackName'
-            - '         --resource WebServerLaunchConfig '
+            - '         --resource RosLaunchConfig '
             - '         --configsets All '
             - '         --region '
             - !Ref 'AWS::Region'
@@ -188,7 +188,7 @@ Resources:
             - '/opt/aws/bin/cfn-signal -e $? '
             - '         --stack '
             - !Ref 'AWS::StackName'
-            - '         --resource WebServerFleet '
+            - '         --resource RosASG '
             - '         --region '
             - !Ref 'AWS::Region'
             - |+
