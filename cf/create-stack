@@ -1,1 +1,1 @@
-aws cloudformation create-stack --stack-name MyRos --template-body file://realm-object-server.json --parameters ParameterKey=KeyName,ParameterValue=ckamps-general
+aws cloudformation create-stack --stack-name MyRos --template-body file://realm-object-server.yaml --parameters ParameterKey=KeyName,ParameterValue=ckamps-general

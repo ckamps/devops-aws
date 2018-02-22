@@ -2,7 +2,7 @@
 # Realm Object Server Deployment Template
 #------------------------------------------------------------------------------------
 
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
 
@@ -15,6 +15,11 @@ Parameters:
     Description: Name of the second availability zone in which the servers will be created.
     Type: 'AWS::EC2::AvailabilityZone::Name'
     Default: us-west-2b
+
+  Environment:
+    Description: Environment - dev, test, prod
+    Type: String
+    Default: 'Dev'
 
   ServerCount:
     Description: Number of Amazon EC2 instances to launch for the WebServer server
@@ -59,28 +64,12 @@ Parameters:
 
 Mappings:
   AWSInstanceType2Arch:
-    t1.micro:
-      Arch: PV64
     t2.micro:
       Arch: HVM64
     t2.small:
       Arch: HVM64
     t2.medium:
       Arch: HVM64
-    m1.small:
-      Arch: PV64
-    m1.medium:
-      Arch: PV64
-    m1.large:
-      Arch: PV64
-    m1.xlarge:
-      Arch: PV64
-    m2.xlarge:
-      Arch: PV64
-    m2.2xlarge:
-      Arch: PV64
-    m2.4xlarge:
-      Arch: PV64
     m3.medium:
       Arch: HVM64
     m3.large:
@@ -92,15 +81,12 @@ Mappings:
 
   AWSRegionArch2AMI:
     us-east-1:
-      PV64: ami-1ccae774
       HVM64: ami-1ecae776
       HVMG2: ami-8c6b40e4
     us-west-2:
-      PV64: ami-ff527ecf
       HVM64: ami-e7527ed7
       HVMG2: ami-abbe919b
     us-west-1:
-      PV64: ami-d514f291
       HVM64: ami-d114f295
       HVMG2: ami-f31ffeb7
 
@@ -232,6 +218,10 @@ Resources:
       TargetGroupARNs:
         - !Ref RosTargetGroup
       LaunchConfigurationName: !Ref RosLaunchConfig
+      Tags:
+        - Key: Name
+          Value: Realm Object Server
+          PropagateAtLaunch: true
     DependsOn:
       - PubRoute
 
@@ -271,17 +261,17 @@ Resources:
           yum install -y aws-cfn-bootstrap
               
           # Install the files and packages from the metadata
-          /opt/aws/bin/cfn-init -v
-              --stack !Ref 'AWS::StackName'
-              --resource RosLaunchConfig
-              --configsets All
-              --region !Ref 'AWS::Region'
+          /opt/aws/bin/cfn-init -v \
+              --stack ${AWS::StackName} \
+              --resource RosLaunchConfig \
+              --configsets All \
+              --region ${AWS::Region}
               
           # Signal the status from cfn-init
-          /opt/aws/bin/cfn-signal -e $?
-              --stack !Ref 'AWS::StackName'
-              --resource RosASG '
-              --region !Ref 'AWS::Region'
+          /opt/aws/bin/cfn-signal -e $? \
+              --stack ${AWS::StackName} \
+              --resource RosASG \
+              --region ${AWS::Region}
 
     Metadata:
       'AWS::CloudFormation::Init':
@@ -294,12 +284,8 @@ Resources:
               httpd: []
           files:
             /var/www/html/index.html:
-              content: !Join 
-                - |+
-
-                - - >-
-                    <h1>Congratulations, you have successfully launched the AWS
-                    CloudFormation sample.</h1>
+              content: |
+                <h1>Congratulations, you have successfully launched the AWS CloudFormation sample.</h1>
               mode: '000644'
               owner: root
               group: root
