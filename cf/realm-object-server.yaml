@@ -265,40 +265,30 @@ Resources:
       SecurityGroups:
         - !Ref RosSecurityGroup
       AssociatePublicIpAddress: 'true'
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash -xe
-            - |
-              yum install -y aws-cfn-bootstrap
-            - |
-              # Install the files and packages from the metadata
-            - '/opt/aws/bin/cfn-init -v '
-            - '         --stack '
-            - !Ref 'AWS::StackName'
-            - '         --resource RosLaunchConfig '
-            - '         --configsets All '
-            - '         --region '
-            - !Ref 'AWS::Region'
-            - |+
-
-            - |
-              # Signal the status from cfn-init
-            - '/opt/aws/bin/cfn-signal -e $? '
-            - '         --stack '
-            - !Ref 'AWS::StackName'
-            - '         --resource RosASG '
-            - '         --region '
-            - !Ref 'AWS::Region'
-            - |+
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum install -y aws-cfn-bootstrap
+              
+          # Install the files and packages from the metadata
+          /opt/aws/bin/cfn-init -v
+              --stack !Ref 'AWS::StackName'
+              --resource RosLaunchConfig
+              --configsets All
+              --region !Ref 'AWS::Region'
+              
+          # Signal the status from cfn-init
+          /opt/aws/bin/cfn-signal -e $?
+              --stack !Ref 'AWS::StackName'
+              --resource RosASG '
+              --region !Ref 'AWS::Region'
 
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
           All:
-            - ConfigureSampleApp
-        ConfigureSampleApp:
+            - ConfigureRealmObjectServer
+        ConfigureRealmObjectServer:
           packages:
             yum:
               httpd: []
