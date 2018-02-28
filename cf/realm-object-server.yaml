@@ -4,8 +4,9 @@
 
 # TO DO
 #
-#   * Send cfn-* bootstrapping logs to CloudWatch Logs
-#     * https://aws.amazon.com/blogs/devops/view-cloudformation-logs-in-the-console/
+#   * HTTPS
+#     * Auto generate cert vs accept existing cert
+#     * Tie cert to appropriate DNS name
 #   * Install and configure ROS
 #     * Download ROS
 #     * Install
@@ -14,9 +15,6 @@
 #     * S3 bucket per stack instance
 #     * Recurring backup
 #     * Optional stack parameter to specify backup archive in S3
-#   * HTTPS
-#     * Auto generate cert vs accept existing cert
-#     * Tie cert to appropriate DNS name
 #
 
 AWSTemplateFormatVersion: '2010-09-09'
@@ -313,7 +311,7 @@ Resources:
           - !Ref InstanceType
           - Arch
       KeyName: !Ref KeyName
-      IamInstanceProfile: !Ref CfnInstanceProfile
+      IamInstanceProfile: !Ref RosInstanceProfile
       SecurityGroups:
         - !Ref RosSecurityGroup
       AssociatePublicIpAddress: 'true'
@@ -339,9 +337,9 @@ Resources:
       'AWS::CloudFormation::Init':
         configSets:
           All:
-            - ConfigureAWSLogs
+            - ConfigureCloudWatchLogsAgent
             - ConfigureRealmObjectServer
-        ConfigureAWSLogs:
+        ConfigureCloudWatchLogsAgent:
           packages:
             yum:
               awslogs: []
@@ -353,43 +351,36 @@ Resources:
 
                 [/var/log/cloud-init.log]
                 file = /var/log/cloud-init.log
-                log_group_name = ${CfnLogGroup}
+                log_group_name = ${CloudWatchLogsAgentGroup}
                 log_stream_name = {instance_id}/cloud-init.log
                 datetime_format =
 
                 [/var/log/cloud-init-output.log]
                 file = /var/log/cloud-init-output.log
-                log_group_name = ${CfnLogGroup} 
+                log_group_name = ${CloudWatchLogsAgentGroup} 
                 log_stream_name = {instance_id}/cloud-init-output.log
                 datetime_format = 
 
                 [/var/log/cfn-init.log]
                 file = /var/log/cfn-init.log
-                log_group_name = ${CfnLogGroup}
+                log_group_name = ${CloudWatchLogsAgentGroup}
                 log_stream_name = {instance_id}/cfn-init.log
                 datetime_format = 
 
                 [/var/log/cfn-hup.log]
                 file = /var/log/cfn-hup.log
-                log_group_name = ${CfnLogGroup}
+                log_group_name = ${CloudWatchLogsAgentGroup}
                 log_stream_name = {instance_id}/cfn-hup.log
                 datetime_format = 
 
                 [/var/log/cfn-wire.log]
                 file = /var/log/cfn-wire.log
-                log_group_name = ${CfnLogGroup}
+                log_group_name = ${CloudWatchLogsAgentGroup}
                 log_stream_name = {instance_id}/cfn-wire.log
                 datetime_format = 
-
-                [/var/log/httpd]
-                file = /var/log/httpd/*
-                log_group_name = ${CfnLogGroup}
-                log_stream_name = {instance_id}/httpd
-                datetime_format = %d/%b/%Y:%H:%M:%S
               mode: '000444'
               owner: root
               group: root
-
             /etc/awslogs/awscli.conf:
               content: !Sub |
                 [plugins]
@@ -399,10 +390,9 @@ Resources:
               mode: '000444'
               owner: root
               group: root
-
           commands:
-            - create-awslogs-state-file:
-                command: 'mkdir -p /var/awslogs/state'
+            create-awslogs-state-file:
+              command: 'mkdir -p /var/awslogs/state'
           services:
             sysvinit:
               awslogs:
@@ -410,7 +400,6 @@ Resources:
                 ensureRunning: 'true'
                 files:
                   - '/etc/awslogs/awslogs.conf'
-                  
         ConfigureRealmObjectServer:
           packages:
             yum:
@@ -428,7 +417,7 @@ Resources:
                 enabled: 'true'
                 ensureRunning: 'true'
 
-  CfnLogRole: 
+  CloudWatchLogsAgentRole: 
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument: 
@@ -457,18 +446,18 @@ Resources:
                   - "logs:PutLogEvents"
                 Resource: "*"
 
-  CfnInstanceProfile:
+  CloudWatchLogsAgentGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: !Sub '${AWS::StackName}-cloud-watch-logs-agent'
+      RetentionInDays: 1
+
+  RosInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties: 
       Path: "/"
       Roles:
-        - !Ref CfnLogRole
-
-  CfnLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties: 
-      LogGroupName: !Sub '${AWS::StackName}-cfn-logs'
-      RetentionInDays: 1
+        - !Ref CloudWatchLogsAgentRole
 
 Outputs:
 
