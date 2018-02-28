@@ -166,7 +166,7 @@ Resources:
     Type: 'AWS::Logs::LogStream'
     Properties:
       LogGroupName: !Sub '${AWS::StackName}-vpc-flow-logs'
-      LogStreamName: !Sub '${AWS::StackName}-vpc-flow-logs-stream'
+      LogStreamName: !Sub '${AWS::StackName}-vpc-flow-logs-stream.log'
     DependsOn:
       - VpcFlowLogGroup
 
@@ -389,6 +389,7 @@ Resources:
               mode: '000444'
               owner: root
               group: root
+
             /etc/awslogs/awscli.conf:
               content: !Sub |
                 [plugins]
@@ -398,6 +399,7 @@ Resources:
               mode: '000444'
               owner: root
               group: root
+
           commands:
             - create-awslogs-state-file:
                 command: 'mkdir -p /var/awslogs/state'
