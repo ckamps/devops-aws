@@ -2,6 +2,23 @@
 # Realm Object Server Deployment Template
 #------------------------------------------------------------------------------------
 
+# TO DO
+#
+#   * Send cfn-* bootstrapping logs to CloudWatch Logs
+#     * https://aws.amazon.com/blogs/devops/view-cloudformation-logs-in-the-console/
+#   * Install and configure ROS
+#     * Download ROS
+#     * Install
+#     * Configure system service
+#   * Backup/recovery of ROS
+#     * S3 bucket per stack instance
+#     * Recurring backup
+#     * Optional stack parameter to specify backup archive in S3
+#   * HTTPS
+#     * Auto generate cert vs accept existing cert
+#     * Tie cert to appropriate DNS name
+#
+
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
