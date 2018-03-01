@@ -15,6 +15,7 @@
 #     * S3 bucket per stack instance
 #     * Recurring backup
 #     * Optional stack parameter to specify backup archive in S3
+#   * Should we use EC2 Auto Recovery?
 #
 
 AWSTemplateFormatVersion: '2010-09-09'
