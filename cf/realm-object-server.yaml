@@ -15,7 +15,10 @@
 #     * S3 bucket per stack instance
 #     * Recurring backup
 #     * Optional stack parameter to specify backup archive in S3
-#   * Should we use EC2 Auto Recovery?
+#   * Should we use EC2 Auto Recovery instead of ELB + Auto Scaling Groups?
+#     * ELB + ASG are overkill for this workload because it doesn't horizontally scale in its open source
+# .     distribution.  ELB is likely more costly than simply associating an EIP with the one instance.
+#   * Do same, but with Terraform
 #
 
 AWSTemplateFormatVersion: '2010-09-09'
