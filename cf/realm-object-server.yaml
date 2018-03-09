@@ -7,7 +7,7 @@
 #   * HTTPS
 #     * Auto generate cert vs accept existing cert
 #     * Tie cert to appropriate DNS name
-#   * Install and configure ROS
+#   * Install and configure Realm Object Server (ROS)
 #     * Download ROS
 #     * Install
 #     * Configure system service
