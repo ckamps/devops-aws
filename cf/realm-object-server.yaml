@@ -4,6 +4,9 @@
 
 # TO DO
 #
+#   * Monitoring
+#     * Add CloudWatch monitoring for filesystem space utilization
+#       * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
 #   * HTTPS
 #     * Auto generate cert vs accept existing cert
 #     * Tie cert to appropriate DNS name
