@@ -7,6 +7,7 @@
 #   * Monitoring
 #     * Add CloudWatch monitoring for filesystem space utilization
 #       * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
+#       * https://github.com/adoreboard/aws-cloudformation-templates/blob/master/MongoDbConfigServer.template#L104
 #   * HTTPS
 #     * Auto generate cert vs accept existing cert
 #     * Tie cert to appropriate DNS name
