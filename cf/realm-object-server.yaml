@@ -344,8 +344,33 @@ Resources:
       'AWS::CloudFormation::Init':
         configSets:
           All:
+            - ConfigureCloudWatchMetrics
             - ConfigureCloudWatchLogsAgent
             - ConfigureRealmObjectServer
+        ConfigureCloudWatchMetrics:
+          packages:
+            yum:
+              perl-Switch: []
+              perl-DateTime: []
+              perl-Sys-Syslog: []
+              perl-LWP-Protocol-https: []
+          sources:
+            /home/ec2-user: >-
+              https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip
+          files:
+            /home/ec2-user/crontab:
+              content: !Sub |
+                */1 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --aws-iam-role=${CloudWatchMonitoringRole} --mem-used --memory-units=megabytes --mem-util --disk-space-util --disk-space-used --disk-space-avail --disk-path=/
+              mode: '000600'
+              owner: ec2-user
+              group: ec2-user
+          commands:
+            01_YumUpdateMonitoring:
+              command: yum update -y
+            02_MonitoringCron:
+              command: >-
+                chmod +x /home/ec2-user/aws-scripts-mon/*.pl && crontab -u
+                ec2-user /home/ec2-user/crontab && rm /home/ec2-user/crontab
         ConfigureCloudWatchLogsAgent:
           packages:
             yum:
@@ -424,6 +449,32 @@ Resources:
                 enabled: 'true'
                 ensureRunning: 'true'
 
+  CloudWatchMonitoringRole: 
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Sid: ""
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies: 
+        - 
+          PolicyName: "root"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action:
+                  - "cloudwatch:putMetricData"
+                Resource: "*"
+
   CloudWatchLogsAgentRole: 
     Type: "AWS::IAM::Role"
     Properties:
@@ -464,6 +515,7 @@ Resources:
     Properties: 
       Path: "/"
       Roles:
+        - !Ref CloudWatchMonitoringRole
         - !Ref CloudWatchLogsAgentRole
 
 Outputs:
