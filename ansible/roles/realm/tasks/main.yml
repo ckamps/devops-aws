@@ -30,10 +30,17 @@
   become: yes
   become_user: ros
 
+- name: Initialize Realm
+  command: /home/ros/.nvm/versions/node/v8.11.0/bin/ros init FAST-ROS-Production
+  args:
+    chdir: /home/ros
+  become: yes
+  become_user: ros
+
 - name: Install AWS Cognito mobile user management
   npm:
     name: realm-object-server-cognito-auth
-    path: /home/ros
+    path: /home/ros/FAST-ROS-Production
     executable: /home/ros/.nvm/versions/node/v8.11.0/bin/npm
   become: yes
   become_user: ros
@@ -41,13 +48,6 @@
 # export NVM_DIR="/home/ec2-user/.nvm"
 # 
 # . "/home/ec2-user/.nvm/nvm.sh" 
-
-- name: Initialize Realm
-  command: ros init FAST-ROS-Production
-  args:
-    chdir: /home/ros
-  become: yes
-  become_user: ros
 
 - name: Configure Realm service
   template:

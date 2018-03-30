@@ -1,3 +1,24 @@
+# Testing Ansible Playbooks with Test Kitchen
+
+## Set Up KitchenCI on Amazon Linux to Test Playbooks
+
+    $ gem install test-kitchen
+    $ gem install kitchen-ansible
+    $ gem install kitchen-docker
+
+## Execute Kithcen Tests
+
+    $ kitchen converge
+    $ kitchen verify
+
+# Manually Running Ansible Playbooks
+
+## Install Ansible
+
+    $ sudo pip install ansible
+
+## Manually Execute a Playbook
+
 Execute the following command on a target node to apply the playbook:
 
     $ sudo /usr/local/bin/ansible-playbook -i "localhost," -c local realm-servers.yml
