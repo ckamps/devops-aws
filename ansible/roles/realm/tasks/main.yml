@@ -34,6 +34,8 @@
   npm:
     name: realm-object-server-cognito-auth
     path: /home/ros
+    environment:
+      PATH: "{{ ansible_env.PATH }}:/home/ros/.nvm/versions/node/v8.11.0/bin"
   become: yes
   become_user: ros
 
