@@ -1,0 +1,75 @@
+---
+- name: Create Realm OS group
+  group:
+    name: ros
+    comment: Realm OS
+    uid: 2011
+
+- name: Create Realm OS user
+  user:
+    name: ros
+    comment: Realm OS
+    uid: 2011
+    group: ros
+
+- name: Install Realm
+  npm:
+    name: realm-object-server
+  become: yes
+  become_user: ros
+
+- name: Install AWS Cognito mobile user management
+  npm:
+    name: realm-object-server-cognito-auth
+  become: yes
+  become_user: ros
+
+# export NVM_DIR="/home/ec2-user/.nvm"
+# 
+# . "/home/ec2-user/.nvm/nvm.sh" 
+
+- name: Initialize Realm
+  command: ros init FAST-ROS-Production
+  args:
+    chdir: /home/ros
+  become: yes
+  become_user: ros
+
+- name: Configure Realm service
+  template:
+    src: templates/index.ts.j2
+    dest: /home/ros/FAST-ROS-Production/src/index.ts
+    owner: ros
+    group: ros
+    mode: 0644
+
+# cd FAST-ROS-Production/
+# chmod u+x start.sh
+
+- name: Configure Realm system service
+  template:
+    src: templates/ros.service.j2
+    dest: /lib/systemd/system/ros.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Reload Realm OS service
+  service:
+    name: ros
+    state: reloaded
+
+- name: Start Realm OS service
+  service:
+    name: ros
+    state: started
+#
+# ros backup -f FAST-ROS-Production -t ./ROS-Backups
+# 
+# Enable disk volume growth:
+# lsblk
+# sudo growpart /dev/xvda 1
+# lsblk
+# sudo yum install xfsprogs
+# sudo xfs_growfs -d /dev/xvda1
+# 

@@ -1,0 +1,5 @@
+---
+- hosts: realm-os-servers
+  roles:
+    - common
+    - realm-os
