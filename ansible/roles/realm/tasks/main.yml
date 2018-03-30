@@ -25,7 +25,7 @@
     mode=700
     owner=ros
 
-- name: Execute the nvm-installer.sh
+- name: Execute the Realm installer 
   command: /home/ros/realm-installer.sh
   become: yes
   become_user: ros
@@ -34,8 +34,7 @@
   npm:
     name: realm-object-server-cognito-auth
     path: /home/ros
-    environment:
-      PATH: "{{ ansible_env.PATH }}:/home/ros/.nvm/versions/node/v8.11.0/bin"
+    executable: /home/ros/.nvm/versions/node/v8.11.0/bin/npm
   become: yes
   become_user: ros
 
