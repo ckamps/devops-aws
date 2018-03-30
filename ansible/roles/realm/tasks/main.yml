@@ -2,7 +2,6 @@
 - name: Create Realm OS group
   group:
     name: ros
-    comment: Realm OS
     gid: 2011
 
 - name: Create Realm OS user
