@@ -4,13 +4,8 @@
 
 # TO DO
 #
-#   * Monitoring
-#     * Add CloudWatch monitoring for filesystem space utilization
-#       * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
-#       * https://github.com/adoreboard/aws-cloudformation-templates/blob/master/MongoDbConfigServer.template#L104
-#   * HTTPS
-#     * Auto generate cert vs accept existing cert
-#     * Tie cert to appropriate DNS name
+#   * Install Ansible during bootstrap so that subsequent OS configuration is done
+#     via modular Ansible playbooks
 #   * Install and configure Realm Object Server (ROS)
 #     * Download ROS
 #     * Install
@@ -19,6 +14,9 @@
 #     * S3 bucket per stack instance
 #     * Recurring backup
 #     * Optional stack parameter to specify backup archive in S3
+#   * HTTPS
+#     * Auto generate cert vs accept existing cert
+#     * Tie cert to appropriate DNS name
 #   * Should we use EC2 Auto Recovery instead of ELB + Auto Scaling Groups?
 #     * ELB + ASG are overkill for this workload because it doesn't horizontally scale in its open source
 # .     distribution.  ELB is likely more costly than simply associating an EIP with the one instance.
@@ -345,9 +343,14 @@ Resources:
       'AWS::CloudFormation::Init':
         configSets:
           All:
+            - InstallAnsible
             - ConfigureCloudWatchMetrics
             - ConfigureCloudWatchLogsAgent
             - ConfigureRealmObjectServer
+        InstallAnsible:
+          commands:
+            01_InstallAnsible:
+              command: sudo pip install ansible
         ConfigureCloudWatchMetrics:
           packages:
             yum:
@@ -361,7 +364,7 @@ Resources:
           files:
             /home/ec2-user/crontab:
               content: !Sub |
-                */1 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --aws-iam-role=${CloudWatchMonitoringRole} --mem-used --memory-units=megabytes --mem-util --disk-space-util --disk-space-used --disk-space-avail --disk-path=/
+                */1 * * * * ~/aws-scripts-mon/mon-put-instance-data.pl --aws-iam-role=${RosRole} --mem-used --memory-units=megabytes --mem-util --disk-space-util --disk-space-used --disk-space-avail --disk-path=/
               mode: '000600'
               owner: ec2-user
               group: ec2-user
@@ -450,7 +453,7 @@ Resources:
                 enabled: 'true'
                 ensureRunning: 'true'
 
-  CloudWatchMonitoringRole: 
+  RosRole: 
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument: 
@@ -474,31 +477,6 @@ Resources:
                 Effect: "Allow"
                 Action:
                   - "cloudwatch:putMetricData"
-                Resource: "*"
-
-  CloudWatchLogsAgentRole: 
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - 
-            Sid: ""
-            Effect: "Allow"
-            Principal: 
-              Service: 
-                - "ec2.amazonaws.com"
-            Action: "sts:AssumeRole"
-      Path: "/"
-      Policies: 
-        - 
-          PolicyName: "root"
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement: 
-              - 
-                Effect: "Allow"
-                Action:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"
                   - "logs:DescribeLogStreams"
@@ -516,8 +494,7 @@ Resources:
     Properties: 
       Path: "/"
       Roles:
-        - !Ref CloudWatchMonitoringRole
-        - !Ref CloudWatchLogsAgentRole
+        - !Ref RosRole
 
 Outputs:
 
