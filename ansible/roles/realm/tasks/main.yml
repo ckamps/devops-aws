@@ -14,12 +14,14 @@
 - name: Install Realm
   npm:
     name: realm-object-server
+    path: /home/ros
   become: yes
   become_user: ros
 
 - name: Install AWS Cognito mobile user management
   npm:
     name: realm-object-server-cognito-auth
+    path: /home/ros
   become: yes
   become_user: ros
 
