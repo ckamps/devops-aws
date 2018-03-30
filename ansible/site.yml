@@ -1,2 +1,2 @@
 ---
-- import_playbook: realm-os-servers.yml
+- import_playbook: realm-servers.yml

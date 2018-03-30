@@ -3,7 +3,7 @@
   group:
     name: ros
     comment: Realm OS
-    uid: 2011
+    gid: 2011
 
 - name: Create Realm OS user
   user:
