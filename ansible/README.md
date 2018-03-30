@@ -5,6 +5,7 @@
     $ gem install test-kitchen
     $ gem install kitchen-ansible
     $ gem install kitchen-docker
+    $ gem install kitchen-verifier-serverspec
 
 ## Execute Kithcen Tests
 
