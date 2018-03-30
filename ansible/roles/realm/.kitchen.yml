@@ -3,19 +3,22 @@ driver:
   name: docker
   privileged: true
 
+platforms:
+  - name: centos
+    driver_config:
+      image: centos:7
+
 provisioner:
   name: ansible_playbook
   hosts: localhost
+  ansible_verbose: false
+  ansible_verbosity: 2
+  require_ansible_repo: false
   require_chef_for_busser: false
   require_ruby_for_busser: false
 
 verifier:
   name: serverspec
-
-platforms:
-  - name: centos
-    driver_config:
-      image: centos:7
 
 suites:
   - name: default
