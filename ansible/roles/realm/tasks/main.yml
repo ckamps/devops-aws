@@ -11,10 +11,22 @@
     uid: 2011
     group: ros
 
-- name: Install Realm
-  npm:
-    name: realm-object-server
-    path: /home/ros
+#- name: Install Realm
+#  npm:
+#    name: realm-object-server
+#    path: /home/ros
+#  become: yes
+#  become_user: ros
+
+- name: Download Realm installer
+  get_url:
+    url="https://raw.githubusercontent.com/realm/realm-object-server/master/install.sh"
+    dest=/home/ros/realm-installer.sh 
+    mode=700
+    owner=ros
+
+- name: Execute the nvm-installer.sh
+  command: /home/ros/realm-installer.sh
   become: yes
   become_user: ros
 
