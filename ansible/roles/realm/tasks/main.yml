@@ -11,27 +11,43 @@
     uid: 2011
     group: ros
 
-#- name: Install Realm
-#  npm:
-#    name: realm-object-server
-#    path: /home/ros
-#  become: yes
-#  become_user: ros
+- name: Install Python pip
+  yum:
+    name: python2-pip
+    state: present
 
-- name: Download Realm installer
+- name: Install pexpect to support Ansible expect module
+  pip:
+    name: pexpect
+    state: present
+
+- name: Download Node.js Yum Repo Setup Script
   get_url:
-    url="https://raw.githubusercontent.com/realm/realm-object-server/master/install.sh"
-    dest=/home/ros/realm-installer.sh 
+    url="https://rpm.nodesource.com/setup_8.x"
+    dest=/root/setup_8.x
     mode=700
-    owner=ros
 
-- name: Execute the Realm installer 
-  command: /home/ros/realm-installer.sh
+- name: Add Node.js Repository
+  command: /root/setup_8.x
+
+- name: Install Node.js
+  yum:
+    name: nodejs
+    state: present
+
+- name: Install Realm
+  npm:
+    name: realm-object-server
+    path: /home/ros
   become: yes
   become_user: ros
 
 - name: Initialize Realm
-  command: /home/ros/.nvm/versions/node/v8.11.0/bin/ros init FAST-ROS-Production
+  expect: 
+    command: /home/ros/node_modules/.bin/ros init FAST-ROS-Production
+    responses:
+       Agree with your email: "cpkampmeier@gmail.com"
+       Would you like to receive: "N"
   args:
     chdir: /home/ros
   become: yes
@@ -41,13 +57,8 @@
   npm:
     name: realm-object-server-cognito-auth
     path: /home/ros/FAST-ROS-Production
-    executable: /home/ros/.nvm/versions/node/v8.11.0/bin/npm
   become: yes
   become_user: ros
-
-# export NVM_DIR="/home/ec2-user/.nvm"
-# 
-# . "/home/ec2-user/.nvm/nvm.sh" 
 
 - name: Configure Realm service
   template:
@@ -57,8 +68,13 @@
     group: ros
     mode: 0644
 
-# cd FAST-ROS-Production/
-# chmod u+x start.sh
+- name: Configure Realm Startup Script
+  template:
+    src: templates/start.sh.j2
+    dest: /home/ros/FAST-ROS-Production/start.sh
+    owner: ros
+    group: ros
+    mode: 0744
 
 - name: Configure Realm system service
   template:
@@ -86,4 +102,3 @@
 # lsblk
 # sudo yum install xfsprogs
 # sudo xfs_growfs -d /dev/xvda1
-# 

@@ -1,4 +1,4 @@
-iimport { BasicServer, auth } from 'realm-object-server'
+import { BasicServer, auth } from 'realm-object-server'
 import * as path from 'path'
 
 import { CognitoAuthProvider } from "realm-object-server-cognito-auth";
@@ -31,8 +31,9 @@ server.start({
         // port: 9080,
 
         // Override the default list of authentication providers
-        // authProviders?: IAuthProvider[] = ['password']
-        authProviders: [cognitoAuthProvider],
+        //authProviders?: IAuthProvider[] = ['password']
+        authProviders: [usernamePasswordProvider],
+        //authProviders: [cognitoAuthProvider],
 
         // Autogenerate public and private keys on startup
         // autoKeyGen?: boolean = true
