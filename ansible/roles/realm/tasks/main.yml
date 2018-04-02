@@ -1,15 +1,16 @@
 ---
+
 - name: Create Realm OS group
   group:
-    name: ros
-    gid: 2011
+    name: "{{ realm_os_group }}"
+    gid: "{{ realm_os_group_id }}"
 
 - name: Create Realm OS user
   user:
-    name: ros
+    name: "{{ realm_os_user }}"
     comment: Realm OS
-    uid: 2011
-    group: ros
+    uid: "{{ realm_os_user_id }}"
+    group: "{{ realm_os_group }}"
 
 - name: Install Python pip
   yum:
@@ -29,6 +30,8 @@
 
 - name: Add Node.js Repository
   command: /root/setup_8.x
+  args:
+    creates: /etc/yum.repos.d/nodesource-el7.repo
 
 - name: Install Node.js
   yum:
@@ -38,42 +41,45 @@
 - name: Install Realm
   npm:
     name: realm-object-server
-    path: /home/ros
+    path: "{{ realm_home }}"
+    state: present
   become: yes
-  become_user: ros
+  become_user: "{{ realm_os_user }}"
 
 - name: Initialize Realm
   expect: 
-    command: /home/ros/node_modules/.bin/ros init FAST-ROS-Production
+    command: "{{ realm_home }}/node_modules/.bin/ros init {{ realm_instance_name }}"
     responses:
-       Agree with your email: "cpkampmeier@gmail.com"
+       Agree with your email: "{{ realm_license_email }}"
        Would you like to receive: "N"
   args:
-    chdir: /home/ros
+    creates: "{{ realm_home }}/{{ realm_instance_name }}"
+    chdir: "{{ realm_home }}"
   become: yes
-  become_user: ros
+  become_user: "{{ realm_os_user }}"
 
 - name: Install AWS Cognito mobile user management
   npm:
     name: realm-object-server-cognito-auth
-    path: /home/ros/FAST-ROS-Production
+    path: "{{ realm_home }}/{{ realm_instance_name }}"
+    state: present
   become: yes
-  become_user: ros
+  become_user: "{{ realm_os_user }}"
 
 - name: Configure Realm service
   template:
     src: templates/index.ts.j2
-    dest: /home/ros/FAST-ROS-Production/src/index.ts
-    owner: ros
-    group: ros
+    dest: "{{ realm_home }}/{{ realm_instance_name }}/src/index.ts"
+    owner: "{{ realm_os_user }}"
+    group: "{{ realm_os_group }}"
     mode: 0644
 
 - name: Configure Realm Startup Script
   template:
     src: templates/start.sh.j2
-    dest: /home/ros/FAST-ROS-Production/start.sh
-    owner: ros
-    group: ros
+    dest: "{{ realm_home }}/{{ realm_instance_name }}/start.sh"
+    owner: "{{ realm_os_user }}"
+    group: "{{ realm_os_group }}"
     mode: 0744
 
 - name: Configure Realm system service
@@ -82,17 +88,14 @@
     dest: /lib/systemd/system/ros.service
     owner: root
     group: root
-    mode: 0644
-
-- name: Reload Realm OS service
-  service:
-    name: ros
-    state: reloaded
+    mode: 0664
 
 - name: Start Realm OS service
-  service:
+  systemd:
     name: ros
     state: started
+    daemon_reload: yes
+
 #
 # ros backup -f FAST-ROS-Production -t ./ROS-Backups
 # 
