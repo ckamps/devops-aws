@@ -25,6 +25,6 @@ Execute the following command on a target node to apply the playbook:
 
     $ sudo /usr/local/bin/ansible-playbook -i "localhost," -c local realm-servers.yml
     
-## List All Ansible Facts on Local Node
+# Listing All Ansible Facts on Local Node
 
     $ ansible localhost -m setup
