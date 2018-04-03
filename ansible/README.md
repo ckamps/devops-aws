@@ -5,6 +5,7 @@
     $ gem install test-kitchen
     $ gem install kitchen-ansible
     $ gem install kitchen-docker
+    $ gem install kitchen-ec2
     $ gem install kitchen-verifier-serverspec
 
 ## Execute Kithcen Tests
@@ -23,3 +24,7 @@
 Execute the following command on a target node to apply the playbook:
 
     $ sudo /usr/local/bin/ansible-playbook -i "localhost," -c local realm-servers.yml
+    
+## List All Ansible Facts on Local Node
+
+    $ ansible localhost -m setup
