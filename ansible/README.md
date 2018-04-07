@@ -6,7 +6,7 @@
     $ gem install kitchen-ansible
     $ gem install kitchen-docker
     $ gem install kitchen-ec2
-    $ gem install kitchen-verifier-serverspec
+    $ gem install kitchen-inspec
 
 ## Execute Kithcen Tests
 
