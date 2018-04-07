@@ -2,15 +2,14 @@
 
 ## Set Up KitchenCI on Amazon Linux to Test Playbooks
 
-    $ gem install test-kitchen
-    $ gem install kitchen-ansible
-    $ gem install kitchen-docker
-    $ gem install kitchen-ec2
-    $ gem install kitchen-inspec
+See `Gemfile`
+
+## Set Up .kitchen.yml
+
+...
 
 ## Execute Kithcen Tests
 
-    $ kitchen converge
     $ kitchen verify
 
 # Manually Running Ansible Playbooks
