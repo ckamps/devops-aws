@@ -6,12 +6,10 @@
 #
 #   * Install Ansible during bootstrap so that subsequent OS configuration is done
 #     via modular Ansible playbooks
-#   * Install and configure Realm Object Server (ROS)
-#     * Download ROS
-#     * Install
-#     * Configure system service
+#   * Integrate Ansible Role for Realm Object server to install and configure
 #   * Backup/recovery of ROS
 #     * S3 bucket per stack instance
+#       * Use VPC endpoint for private communication to S3
 #     * Recurring backup
 #     * Optional stack parameter to specify backup archive in S3
 #   * HTTPS
